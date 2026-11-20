@@ -1,12 +1,16 @@
-# Frozen Base-4Inch baseline
+# INFO2 development
 
-This repository is the frozen reference for the 91 Firebird display project.
+This is the INFO2 application repository for the 91 Firebird display project.
+Development is authorized here; the frozen baseline is Avenger454/Base-4Inch.
+Preserve the validated 720 x 720 display initialization, DSI compatibility wrapper and linker flags.
+Do not modify Base-4Inch as part of gauge development.
+Keep demo distances separate from persistent mileage.
 
-- Hardware-validated firmware commit: `72794a6d8cebcbf384e8cf7f9530619f84403b43`.
-- User confirmed normal gauge sweep and correct display on November 20, 2026.
-- Target: Waveshare 4-inch ESP32-P4, 720 x 720, ESP-IDF 5.5.6; tested chip revision 3.2.
-- Preserve the DSI clock compatibility wrapper and its linker extraction flag.
-- Do not modify or push changes to this repository unless the user explicitly authorizes unlocking Base.
-- Create SPEEDO, TACH, INFO1, INFO2 and other development work in separate repositories cloned from this baseline.
+## Default sweep style for future gauge designs
 
-This file records a development freeze; GitHub archive/protection settings must be applied separately to enforce read-only access.
+- Use a narrow, opaque bright red (#FF0000) radial needle spanning the space between the inner and outer blue arcs.
+- Default width is 7 px on a 720 x 720 face; scale proportionally on other displays.
+- Calibrate needle endpoints to each face's arcs and its angle mapping to the scale; do not reuse another face's radii blindly.
+- Prefer this over a moving dash or animated filled arc unless the user requests another style.
+- Preserve bounded old/new needle invalidation, local point coordinates, unchanged-value skips, and static backgrounds.
+- Keep the slow 30-second up/down demo sweep unless requested otherwise.
