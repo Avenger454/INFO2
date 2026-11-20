@@ -26,6 +26,9 @@ extern lv_obj_t *ui_label_odometer_value;
 void ui_tach_set_rpm(int rpm);
 void ui_tach_set_gear(int gear);
 
+// LVGL-context setter. NAN means unavailable; battery units are volts.
+void ui_info2_set_values(float fuel_pct, float battery_volts);
+
 // CUSTOM VARIABLES
 
 #ifdef __cplusplus
@@ -33,5 +36,6 @@ void ui_tach_set_gear(int gear);
 #endif
 
 #endif
+
 
 

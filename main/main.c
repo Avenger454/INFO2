@@ -557,66 +557,18 @@ void tach_set_rpm(int rpm){
 
 
 void gauge_timer(lv_timer_t * t) {
+    (void)t;
 #if GAUGE_DEMO_MODE
-    // 30-second triangular sweep: 15 seconds up, 15 seconds down.
-    // Runs in the existing LVGL timer; no extra task or hardware required.
-    const uint32_t phase_ms = (uint32_t)((esp_timer_get_time() / 1000) % 30000);
-    const uint32_t ramp_ms = (phase_ms <= 15000) ? phase_ms : (30000 - phase_ms);
-    rpmNow = (float)ramp_ms * (6500.0f / 15000.0f);
-#endif
-
-    static float displayRPM = 0.0f;
-    displayRPM += 0.20f * (rpmNow - displayRPM);
-
-    tach_set_rpm(displayRPM);
-
-    double miles = odometer_get_miles();
-    char odo_buf[16];
-    snprintf(odo_buf, sizeof(odo_buf), "%06.1f", miles);
-    update_label_if_needed(ui_label_odometer_value, odo_buf, green_color);
-
-
-    // Demo gears are display tests, not inferred transmission state.
-#if GAUGE_DEMO_MODE
-    ui_tach_set_gear(1 + (int)((esp_timer_get_time() / 3000000LL) % 8));
+    // 30-second up/down sweep for both display-only gauge inputs.
+    uint32_t phase = (uint32_t)((esp_timer_get_time() / 1000) % 30000);
+    uint32_t ramp = phase <= 15000 ? phase : 30000 - phase;
+    float fraction = ramp / 15000.0f;
+    ui_info2_set_values(fraction * 100.0f, 11.0f + fraction * 4.0f);
 #else
-    // Feed verified transmission gear here when its protocol is integrated.
-    ui_tach_set_gear(-1);
+    // Battery voltage needs a verified source; do not substitute a demo value.
+    ui_info2_set_values(g_gauge_data.fuel_level_pct, NAN);
 #endif
-
-    if (SENSOR_SOURCE == SENSOR_SOURCE_CAN){
-        float speed_mph = g_speed_mph;
-
-        if (speed_mph < GPS_MIN_VALID_MPH)
-            speed_mph = 0.0f;
-
-        int speed = (int)speed_mph;
-        static char buf[8];
-        snprintf(buf, sizeof(buf), "%d", speed);
-        lv_label_set_text(ui_label_mph_value, buf);
-
-        char afr_buf[12];
-        snprintf(afr_buf, sizeof(afr_buf), "%4.1f", g_gauge_data.afr);
-
-        char boost_buf[12];
-        snprintf(boost_buf, sizeof(boost_buf), "%4.1f", g_gauge_data.boost_psi);
-
-
-        char fuel_comp_buf[12];
-        snprintf(fuel_comp_buf, sizeof(fuel_comp_buf), "%4.1f", g_gauge_data.fuel_comp);
-        //***Update afr and boost and fuel_comp labels here, 
-        // example -> update_label_if_needed(ui_label_odometer_value, odo_buf, green_color);
-        // update_label_if_needed();
-        // update_label_if_needed();
-    
-    }
-
-
 }
-
-//------------------------------------------------------------------------//
-
-
 
 float resistance_to_F(float R) {
     if (R >= sensorR[0]) return tempF[0];
@@ -1202,4 +1154,3 @@ void app_main(void) {
     bsp_display_brightness_set(50); 
 
 }
-
